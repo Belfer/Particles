@@ -1,0 +1,7 @@
+#pragma once
+
+#define PI      3.14159265359
+#define RAD2DEG 57.2957795056
+#define DEG2RAD 0.01745329252
+
+#define EPSILON 0.00000000001
