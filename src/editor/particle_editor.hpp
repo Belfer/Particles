@@ -7,13 +7,13 @@ struct ParticleEditor
 {
     bool setup(const std::string& respath, const std::string& imgpath);
 
-    bool update(ParticleEmitter& particles, const sf::Time& elapsed);
+    void update(ParticleEmitter& particles, const sf::Time& elapsed);
 
-private:
     void save(ParticleEmitter& particles);
 
-    void open();
+    void open(ParticleEmitter& particles);
 
+private:
     std::string respath;
     std::string imgpath;
     sf::Texture texture;

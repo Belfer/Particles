@@ -30,7 +30,7 @@ find_package(OpenGL REQUIRED)
 find_package(SFML 2.3 REQUIRED graphics window system audio network)
 
 include_directories(src
-    src/core src/gui src/lua src/physics src/serialize src/util
+    src/core src/gui src/lua src/physics src/cereal src/util
     src/editor
     ${SFML_INCLUDE_DIR}
 )

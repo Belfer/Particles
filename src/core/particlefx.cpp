@@ -3,7 +3,8 @@
 #include "hsl.hpp"
 
 ParticleEmitter::ParticleEmitter(size_t count)
-    : emitter(0, 0),
+    : count(count),
+      emitter(0, 0),
       offset(0, 0),
       force(0, -3),
       torque(0),
@@ -24,6 +25,13 @@ ParticleEmitter::ParticleEmitter(size_t count)
 {
 }
 ParticleEmitter::~ParticleEmitter() {}
+
+void ParticleEmitter::resize(size_t count)
+{
+    this->count = count;
+    particles.resize(count);
+    vertices.resize(count*4);
+}
 
 void ParticleEmitter::resetAll()
 {

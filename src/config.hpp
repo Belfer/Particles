@@ -14,6 +14,7 @@
 #define GL_DEPTHBITS 4
 
 #define TARGET_FPS 60
+#define SHOW_FPS    1
 
 #define PROC_GUI        1
 #define PROC_FIXED      1

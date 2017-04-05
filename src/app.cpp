@@ -9,17 +9,41 @@
 #include "particle_editor.hpp"
 #include "vec2.hpp"
 
-#define NUM_PARTICLES 100
+#define MAX_PARTICLES 32
+
+#define P_RADIUS 10
+#define P_SQRADIUS P_RADIUS*P_RADIUS
+
+LinearAllocator* allocator;
+std::vector<ParticleEmitter*> particles;
+size_t active = 0;
 
 ParticleEditor editor;
-ParticleEmitter particles(NUM_PARTICLES);
+sf::CircleShape circle;
 
 bool dragging = false;
 
 bool App::init(const std::string& respath)
 {
+    const size_t allocSize = sizeof(ParticleEmitter) * MAX_PARTICLES;
+    allocator = new LinearAllocator(allocSize, malloc(allocSize));
+
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+    particles.emplace_back(mem::New<ParticleEmitter>(*allocator));
+
     editor.setup(respath, "/textures/particle.png");
-    particles.emitter = views[0].getCenter();
+
+    circle.setRadius(P_RADIUS);
+    circle.setOutlineThickness(1.f);
+    circle.setOutlineColor(sf::Color::Green);
+    circle.setFillColor(sf::Color::Transparent);
 
     reset();
     return true;
@@ -27,7 +51,8 @@ bool App::init(const std::string& respath)
 
 void App::reset()
 {
-    particles.resetAll();
+    for(auto p : particles)
+        p->resetAll();
 }
 
 void App::input(const sf::Event& event)
@@ -41,8 +66,16 @@ void App::input(const sf::Event& event)
             reset();
     }
     else
-    if(event.type == sf::Event::MouseButtonPressed)
-        dragging = true;
+    if(event.type == sf::Event::MouseButtonPressed) {
+        const sf::Vector2f mpos = getWindow().mapPixelToCoords(sf::Mouse::getPosition(getWindow()));
+        for(size_t i=0; i<particles.size(); ++i) {
+            float sqDist = vec2::magnitudeSq(particles[i]->emitter - mpos);
+            if(sqDist < P_SQRADIUS) {
+                active = i;
+                dragging = true;
+            }
+        }
+    }
     else
     if(event.type == sf::Event::MouseButtonReleased)
         dragging = false;
@@ -53,13 +86,28 @@ void App::fixed(float t, float dt)
 
 void App::update(const sf::Time& elapsed)
 {
-    bool input = editor.update(particles, elapsed);
+    ParticleEmitter* current = particles[active];
 
-    if(!input && dragging) {
+    if(dragging) {
         const sf::Vector2f mpos = getWindow().mapPixelToCoords(sf::Mouse::getPosition(getWindow()));
-        vec2::lerp(particles.emitter, particles.emitter, mpos, 0.2f);
+        vec2::lerp(current->emitter, current->emitter, mpos, 0.2f);
     }
-    particles.update(elapsed);
+
+    for(auto p : particles)
+        p->update(elapsed);
+
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if(ImGui::MenuItem("Open")) editor.open(*current);
+            if(ImGui::MenuItem("Save")) editor.save(*current);
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+    editor.update(*current, elapsed);
 }
 
 void App::pre_draw()
@@ -69,7 +117,12 @@ void App::pre_draw()
 void App::draw(const sf::View& view)
 {
     getWindow().setView(view);
-    getWindow().draw(particles);
+    for(auto p : particles) {
+        getWindow().draw(*p);
+
+        circle.setPosition(p->emitter-sf::Vector2f(P_RADIUS, P_RADIUS));
+        getWindow().draw(circle);
+    }
 }
 
 void App::post_draw()

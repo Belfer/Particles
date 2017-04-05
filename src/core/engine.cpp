@@ -43,6 +43,11 @@ void Engine::loop(Game* game, sf::RenderWindow& window)
     sf::Clock clock;
     sf::Time elapsed;
 
+#if SHOW_FPS
+    size_t fps = 0;
+    sf::Time fpsTimer;
+#endif
+
 #if PROC_FIXED
     float frameTime = 1.f / TARGET_FPS;
     float accumulator = 0.f;
@@ -53,6 +58,17 @@ void Engine::loop(Game* game, sf::RenderWindow& window)
     while(window.isOpen())
     {
         elapsed = clock.restart();
+
+#if SHOW_FPS
+        fps++;
+        fpsTimer += elapsed;
+        if(fpsTimer.asSeconds() >= 1) {
+            std::cout << "FPS: " << fps << "\n";
+
+            fpsTimer = sf::Time::Zero;
+            fps = 0;
+        }
+#endif
 
         // Process events
         sf::Event event;

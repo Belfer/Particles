@@ -17,8 +17,10 @@ struct Particle
 class ParticleEmitter : public sf::Drawable, public sf::Transformable
 {
 public:
-    ParticleEmitter(size_t count);
+    ParticleEmitter(size_t count = 100);
     ~ParticleEmitter();
+
+    size_t count;
 
     sf::Vector2f emitter;
     sf::Vector2f offset;
@@ -28,8 +30,6 @@ public:
     sf::BlendMode blendMode;
     sf::Color startColor;
     sf::Color endColor;
-
-    size_t count;
 
     float minLife;
     float maxLife;
@@ -46,11 +46,15 @@ public:
     float minSize;
     float maxSize;
 
+    void resize(size_t count);
+
     void resetAll();
 
     void setTexture(sf::Texture* texture);
 
     void update(const sf::Time& elapsed);
+
+    inline size_t getCount() const { return particles.size(); }
 
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -68,14 +72,19 @@ private:
     template <class Archive>
     void serialize(Archive& ar)
     {
-        //ar(emitter);
-        //ar(offset);
-        //ar(force);
-        ar(torque);
-        //ar(blendMode);
-        //ar(startColor);
-        //ar(endColor);
         ar(count);
+        ar(emitter.x); ar(emitter.y);
+        ar(offset.x); ar(offset.y);
+        ar(force.x); ar(force.y);
+        ar(torque);
+        ar(blendMode.colorSrcFactor);
+        ar(blendMode.colorDstFactor);
+        ar(blendMode.colorEquation);
+        ar(blendMode.alphaSrcFactor);
+        ar(blendMode.alphaDstFactor);
+        ar(blendMode.alphaEquation);
+        ar(startColor.r); ar(startColor.g); ar(startColor.b);
+        ar(endColor.r); ar(endColor.g); ar(endColor.b);
         ar(minLife);
         ar(maxLife);
         ar(minAngle);
